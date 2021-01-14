@@ -6,10 +6,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,6 +32,30 @@ class PostControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("jpa"))
         ;
+    }
+
+    @Test
+    public void getPostWithPageable() throws Exception {
+        this.createPosts();
+
+        mockMvc.perform(get("/posts")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "id,desc")
+                        .param("sort", "title")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title", is("post 99")))
+        ;
+    }
+
+    public void createPosts() {
+        for (int i = 0; i < 100; i++) {
+            Post post = new Post();
+            post.setTitle("post " + i);
+            postRepository.save(post);
+        }
     }
 
 }
