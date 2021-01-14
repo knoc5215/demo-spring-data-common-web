@@ -50,6 +50,22 @@ class PostControllerTest {
         ;
     }
 
+    @Test
+    public void getPostWithHATEOAS() throws Exception {
+        this.createPosts();
+
+        mockMvc.perform(get("/posts")
+                .param("page", "2")
+                .param("size", "10")
+                .param("sort", "id,desc")
+                .param("sort", "title")
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_embedded.postList[0].title", is("post 79")))
+        ;
+    }
+
     public void createPosts() {
         for (int i = 0; i < 100; i++) {
             Post post = new Post();
